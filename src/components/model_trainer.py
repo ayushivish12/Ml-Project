@@ -47,10 +47,13 @@ class ModelTrainer:
             logging.info("Split training and test input data")
 
             x_train, y_train, x_test, y_test = (
+
                 train_array[:, :-1],
                 train_array[:, -1],
+
                 test_array[:, :-1],
                 test_array[:, -1]
+
             )
 
             models = {
@@ -74,13 +77,89 @@ class ModelTrainer:
                 "AdaBoost Regressor": AdaBoostRegressor(),
             }
 
+            params = {
+
+                "Decision Tree": {
+
+                    'criterion': [
+                        'squared_error',
+                        'friedman_mse',
+                        'absolute_error',
+                        'poisson'
+                    ],
+
+                },
+
+                "Random Forest": {
+
+                    'n_estimators': [
+                        8, 16, 32, 64, 128, 256
+                    ]
+                },
+
+                "Gradient Boosting": {
+
+                    'learning_rate': [
+                        .1, .01, .05, .001
+                    ],
+
+                    'n_estimators': [
+                        8, 16, 32, 64, 128, 256
+                    ]
+                },
+
+                "Linear Regression": {},
+
+                "K-Neighbors Regressor": {
+
+                    'n_neighbors': [
+                        5, 7, 9, 11
+                    ]
+                },
+
+                "XGBRegressor": {
+
+                    'learning_rate': [
+                        .1, .01, .05, .001
+                    ],
+
+                    'n_estimators': [
+                        8, 16, 32, 64, 128, 256
+                    ]
+                },
+
+                "CatBoosting Regressor": {
+
+                    'depth': [6, 8, 10],
+
+                    'iterations': [
+                        30, 50, 100
+                    ]
+                },
+
+                "AdaBoost Regressor": {
+
+                    'learning_rate': [
+                        .1, .01, 0.5, .001
+                    ],
+
+                    'n_estimators': [
+                        8, 16, 32, 64, 128, 256
+                    ]
+                }
+
+            }
+
             model_report: dict = evaluate_models(
 
                 x_train=x_train,
                 y_train=y_train,
+
                 x_test=x_test,
                 y_test=y_test,
-                models=models
+
+                models=models,
+                param=params
 
             )
 
@@ -99,13 +178,14 @@ class ModelTrainer:
             best_model = models[best_model_name]
 
             if best_model_score < 0.6:
+
                 raise CustomException(
                     "No best model found",
                     sys
                 )
 
             logging.info(
-                "Best found model on both training and testing dataset"
+                "Best model found on both training and testing dataset"
             )
 
             save_object(
@@ -118,7 +198,10 @@ class ModelTrainer:
 
             predicted = best_model.predict(x_test)
 
-            r2_square = r2_score(y_test, predicted)
+            r2_square = r2_score(
+                y_test,
+                predicted
+            )
 
             return r2_square
 
